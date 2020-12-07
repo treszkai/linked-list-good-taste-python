@@ -1,4 +1,6 @@
-# Linked lists, pointer tricks and good taste
+# Linked lists, pointer tricks and good taste: Python version
+
+(The article is a Python adaptation of [mkirchner's version](https://github.com/mkirchner/linked-list-good-taste), with the text left intact apart from the language differences.)
 
 * [Introduction](#introduction)
 * [The code](#the-code)
@@ -50,38 +52,39 @@ Figure 1.
 <b>Figure 1</b>: Singly linked list of integers.
 </p>
 
-Numbers are arbitrarily chosen integer values and arrows indicate pointers.
-`head` is a pointer of type `IntListItem*` and each of the boxes
-is an instance of an `IntListItem` struct, each with a member variable (called
-`next` in the code) of type `IntListItem*` that points to the next item.
+Numbers are arbitrarily chosen integer values and arrows indicate references to objects.
+`head` is an object of type `IntListItem*` and each of the boxes
+is an instance of `IntListItem`, each with a member variable (called
+`next_item` in the code) of type `IntListItem*` that points to the next item.
 
-The C implementation of the data structure is:
+The Python implementation of the data structure is:
 
-```c
-struct IntListItem {
-    int value;
-    struct IntListItem* next;
-};
-typedef struct IntListItem IntListItem;
+```
+@dataclass
+class IntListItem:
+    value: int
+    next_item: Optional["IntListItem"]
 
-struct IntList {
-    IntListItem* head;
-};
-typedef struct IntList IntList;
 
+@dataclass
+class IntList:
+    head: Optional[IntListItem]
 ```
 We also include a (minimal) API:
 
-```c
-/* The textbook version */
-void remove_cs101(IntList* l, IntListItem* target);
-/* A more elegant solution */
-void remove_elegant(IntList* l, IntListItem* target);
+```python
+class IntList:
+    def remove_cs101(self, target: IntListItem) -> None:
+        """The textbook version"""
+
+    def remove_elegant(self, target: IntListItem) -> None:
+        """A more elegant solution"""
 ```
 
 With that in place, let's have a look at the implementations of
 `remove_cs101()` and `remove_elegant()`. The code of these examples is true
-to the pseudocode from Linus' example and also compiles and runs.
+to the pseudocode from Linus' example and also runs.
+(You can run the tests with `python3 -m unittest src.test_linked_list.py`)
 
 ### The CS101 version
 
@@ -91,30 +94,18 @@ to the pseudocode from Linus' example and also compiles and runs.
 <b>Figure 2</b>: The conceptual model for the list data structure in the CS101 algorithm.
 </p>
 
-```c
-void remove_cs101(IntList *l, IntListItem *target)
-{
-    IntListItem *cur = l->head, *prev = NULL;
-    while (cur != target) {
-        prev = cur;
-        cur = cur->next;
-    }
-    if (prev) {
-        prev->next = cur->next;
-    } else {
-        l->head = cur->next;
-    }
-}
+```python
+TODO
 ```
 
-The standard CS101 approach makes use of two traversal pointers `cur` and
+The standard CS101 approach makes use of two traversal variables `cur` and
 `prev`, marking the current and previous traversal position in the list,
 respectively.  `cur` starts at the list head `head`, and advances until the
-target is found.  `prev` starts at `NULL` and is subsequently updated with the
+target is found.  `prev` starts at `None` and is subsequently updated with the
 previous value of `cur` every time `cur` advances. After the target is found,
-the algorithm tests if `prev` is non-`NULL`. If yes, the item is not at the
+the algorithm tests if `prev` is non-`None`. If yes, the item is not at the
 beginning of the list and the removal consists of re-routing the linked list
-around `cur`. If `prev` is `NULL`, `cur` is pointing to the first element in
+around `cur`. If `prev` is `None`, `cur` is the first element in
 the list, in which case, removal means moving the list head forward.
 
 ### A more elegant solution
@@ -122,23 +113,14 @@ the list, in which case, removal means moving the list head forward.
 The more elegant version has less code and does not require a separate branch
 to deal with deletion of the first element in a list.
 
-```c
-void remove_elegant(IntList *l, IntListItem *target)
-{
-    IntListItem **p = &l->head;
-    while ((*p) != target) {
-        p = &(*p)->next;
-    }
-    *p = target->next;
-}
+```python
+TODO
 ```
 
-The code uses an indirect pointer `p` that holds the address of a pointer to a
-list item, starting with the address of `head`.  In every iteration, that
-pointer is advanced to hold the address of the pointer to the next list item,
-i.e. the address of the `next` element in the current `IntListItem`.
-When the pointer to the list item `(*p)` equals `target`, we exit the search
-loop and remove the item from the list.
+The code uses a variable `item`, with initially referencing `head`. In every
+iteration, `item` is reassigned to the next list item, i.e. the `next_item`
+attribute of the current `IntListItem` object. When `item` is the same object
+as `target`, we exit the search loop and remove the item from the list.
 
 
 ## How does it work?
